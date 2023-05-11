@@ -40,9 +40,9 @@ copyright = '2022, The VOLTTRON Community'
 author = 'The VOLTTRON Community'
 
 # The short X.Y version
-version = '8.1'
+version = '8.0'
 # The full version, including alpha/beta/rc tags
-release = '8.1'
+release = '8.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -232,7 +232,7 @@ vagent_readme = os.path.join(script_dir, "volttron-api")
 def generate_volttron_docs(app):
     import shutil
     global script_dir, vdocs_root, vdocs_source_subdir, vdocs_source_abs_path, vagent_readme
-    volttron_version = "releases/8.1"
+    volttron_version = "releases/8.0"
     volttron_repo = "https://github.com/volttron/volttron"
 
     subprocess.check_call(["git", "clone", "--no-checkout", volttron_repo, vdocs_root], cwd=script_dir)
