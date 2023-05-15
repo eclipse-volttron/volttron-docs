@@ -232,7 +232,7 @@ vagent_readme = os.path.join(script_dir, "volttron-api")
 def generate_volttron_docs(app):
     import shutil
     global script_dir, vdocs_root, vdocs_source_subdir, vdocs_source_abs_path, vagent_readme
-    volttron_version = "releases/8.0"
+    volttron_version = "releases/8.0.0"
     volttron_repo = "https://github.com/volttron/volttron"
 
     subprocess.check_call(["git", "clone", "--no-checkout", volttron_repo, vdocs_root], cwd=script_dir)
