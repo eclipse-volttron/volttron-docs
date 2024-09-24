@@ -132,6 +132,18 @@ and quaterly user meetings. To be invited to office-hours, please `send the team
    Economizer RCx <external-docs/volttron-economizer-rcx/index>
 
 .. toctree::
+   :caption: VOLTTRON Operational Agents
+   :hidden:
+   :titlesonly:
+   :maxdepth: 2
+   :glob:
+
+   Topic Watcher <external-docs/volttron-topic-watcher/index>
+   Threshold detection <external-docs/volttron-threshold-detection/index>
+   Sysmon <external-docs/volttron-sysmon/index>
+   Log statistics <external-docs/volttron-log-statistics/index>
+
+.. toctree::
    :caption: VOLTTRON Releases
    :hidden:
    :titlesonly:

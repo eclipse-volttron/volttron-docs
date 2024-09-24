@@ -91,3 +91,32 @@ Go to Storage Settings. Confirm that the Linux Mint VDI is attached to Controlle
 
 Start the machine by saving these changes and clicking the “Start” arrow located on the upper left hand corner of the
 main VirtualBox window.
+
+
+Install VOLTTRON pre-requisites
+*******************************
+Once you login into your virtual machine, install VOLTTRON pre-requisite softwares in your linux environment. VOLTTRON
+requires the following software
+
+1. python 3.10 (official version tested)
+2. git
+3. python3-venv
+4. poetry
+
+Ubuntu-22.04 comes with python 3.10 and git.
+
+- If not installed, use the command ``sudo apt install python3.10`` to install python3.10
+
+- If not installed, use the command ``sudo apt install git`` to install git
+
+- Install python venv for python 3.10 using the command ``sudo apt-get install python3.10-venv``
+
+- VOLTTRON uses poetry for dependency management. For development environments, it is required that
+  you install poetry, and use poetry commands to create virtual environment and install volttron source packages
+
+    1. Run the command `` curl -sSL https://install.python-poetry.org | python3 -`` to install poetry on Ubuntu
+    2. Add poetry install directory to your PATH. Open .bashrc file in your home directory and add the following command
+       with the correct path to your home directory ``export PATH="<path to your home dir>/.local/bin:$PATH"``
+    3. Source .bashrc (only for the first time) - ``source ~/.bashrc``
+    4. Update poetry configuration to set the default location of poetry virtual environments -
+       ``poetry config virtualenvs.in-project true``

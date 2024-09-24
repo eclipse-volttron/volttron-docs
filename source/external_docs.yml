@@ -4,7 +4,6 @@
 #<volttron-agent-name or volttron-library-name>:
 #    # optional path to repo.
 #    # if not provided default would be "https://github.com/eclipse-volttron/" + agent/library name(parent element)
-#    repo: https://github.com/schandrika/test_agent_docs
 #    # branch or tag that should get pulled. should be valid value to be used wtih git checkout. ex. branch, tag
 #    version: main
 #    # optional docs directory. defaults to "docs/source" under root
@@ -87,4 +86,16 @@ volttron-ilc:
     version: develop
 
 volttron-economizer-rcx:
+    version: develop
+
+volttron-log-statistics:
+    version: develop
+
+volttron-sysmon:
+    version: develop
+
+volttron-threshold-detection:
+    version: develop
+
+volttron-topic-watcher:
     version: develop
