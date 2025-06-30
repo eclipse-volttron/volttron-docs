@@ -21,6 +21,31 @@ The federation system consists of several components:
 Setting Up Federation
 ====================
 
+Start the Federation Registry Service
+-------------------------------------
+
+The Federation Registry Service is a critical component that enables platform discovery. It must be set up before configuring individual platforms.
+
+1. Clone the registry service repository:
+
+   .. code-block:: bash
+
+      git clone https://github.com/VOLTTRON/platform-lookup.git
+      cd platform-lookup
+
+2. Install dependencies:
+
+   .. code-block:: bash
+
+      pip install -r requirements.txt
+
+3. Start the registry service:
+
+   .. code-block:: bash
+
+      # Default port is 8000 add --port 8080 to specify port 8080
+      uvicorn app:app
+
 Enabling Federation
 ------------------
 
