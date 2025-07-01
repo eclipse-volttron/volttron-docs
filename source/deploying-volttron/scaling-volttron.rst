@@ -2,8 +2,8 @@
 Scaling VOLTTRON
 ================
 
-VOLTTRON can be used at scale by installing multiple instances of VOLTTRON at different endpoint or control devices.
-VOLTTRON provides different tools and functionalities to support such a deployment
+VOLTTRON can be used at scale by installing multiple instances of VOLTTRON at multiple host machines.
+VOLTTRON provides tools and functionalities to support such a distributed deployment.
 
 Automated Deployment
 ====================
