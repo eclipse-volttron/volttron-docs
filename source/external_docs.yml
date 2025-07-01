@@ -10,8 +10,6 @@
 #    docs_dir: docs/source
 
 
-
-
 volttron-lib-base-historian:
     repo: https://github.com/eclipse-volttron/volttron-lib-base-historian
     version: develop
@@ -98,4 +96,7 @@ volttron-threshold-detection:
     version: develop
 
 volttron-topic-watcher:
+    version: develop
+
+volttron-ansible:
     version: develop

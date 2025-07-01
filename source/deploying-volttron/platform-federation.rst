@@ -13,8 +13,8 @@ Federation Components
 
 The federation system consists of several components:
 
-- **Federation Registry Service**: A centralized service that tracks available platforms
-- **Federation Service**: A platform service that manages connections to other platforms
+- **Federation Registry Service**: An external centralized service that tracks available VOLTTRON platforms
+- **Federation Service**: A VOLTTRON platform service that manages connections to other platforms
 - **Federation Bridge**: Implements the low-level connection mechanism
 - **Routing Service**: Routes messages between local and remote platforms
 
@@ -76,7 +76,7 @@ REST API for Federation Registry
 Registering a Platform
 ---------------------
 
-When federation is enabled, the platform automatically registers with the specified registry service.
+When federation is enabled, the federation service of volttron platform automatically registers with the specified registry service.
 
 **Request**:
 

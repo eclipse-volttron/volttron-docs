@@ -109,6 +109,7 @@ and quaterly user meetings. To be invited to office-hours, please `send the team
    deploying-volttron/deployment-planning-options
    deploying-volttron/secure-deployment-considerations
    deploying-volttron/linux-system-hardening
+   deploying-volttron/scaling-volttron
 
 .. toctree::
    :caption: VOLTTRON Core Agents
