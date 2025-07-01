@@ -5,7 +5,7 @@ VOLTTRON Federation
 Overview
 ========
 
-Federation allows multiple VOLTTRON platforms to securely communicate with each other, enabling cross-platform messaging and RPC calls.
+Federation allows multiple VOLTTRON platforms to securely communicate with each other, enabling cross-platform messaging using publish and subscribe.
 This document explains how to set up federation between VOLTTRON platforms, including the REST API endpoints for registration and discovery.
 
 Federation Components
@@ -235,25 +235,6 @@ Agents can subscribe to topics from other platforms:
            message={'received_from': platform_id}
        )
 
-Remote Procedure Calls
---------------------
-
-Agents can make RPC calls to agents on remote platforms:
-
-.. code-block:: python
-
-   def get_remote_status(self):
-       try:
-           result = self.vip.rpc.call(
-               # Format: platform.platform_id.agent_id
-               "platform.platform2.status_agent",
-               "get_status",
-               timeout=10
-           ).get()
-           return result
-       except Exception as e:
-           self._log.error(f"Error calling remote platform: {e}")
-           return {"error": str(e)}
 
 Troubleshooting
 ==============
@@ -277,8 +258,7 @@ Security Considerations
 Federation uses the same security mechanisms as normal VOLTTRON communications:
 
 1. **Authentication**: ZeroMQ CURVE authentication with public/private keys
-2. **Authorization**: Standard VOLTTRON auth mechanisms apply to federated communications
-3. **Encryption**: All communications between platforms are encrypted
+2. **Encryption**: All communications between platforms are encrypted
 
 To secure federation:
 
