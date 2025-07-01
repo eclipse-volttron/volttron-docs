@@ -1,3 +1,5 @@
+.. _Volttron-Federation:
+
 =======================
 VOLTTRON Federation
 =======================
