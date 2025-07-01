@@ -9,7 +9,8 @@ Automated Deployment
 ====================
 VOLTTRON provides recipes that leverages `ansible <https://docs.ansible.com/ansible/latest/index.html>`_ to
 orchestrate the deployment and configuration process for VOLTTRON, enabling repeatable and consistent deployments across
-various host machines. Please see :ref:`volttron ansible documentation <VOLTTRON-ANSIBLE>` for more details.
+various host machines.
+Please see `volttron ansible documentation <external-docs/volttron-ansible/index.html>`_ for more details
 
 Federated Service
 =================
