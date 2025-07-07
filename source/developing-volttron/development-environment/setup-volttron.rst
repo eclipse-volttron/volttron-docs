@@ -13,57 +13,58 @@ This document assumes you already have
 
 Running VOLTTRON with source code
 ==================================
-1. Create a new directory, say volttron_instance1
-1. Create a new virtual environment in that directory and activate it
-   ``
-   cd volttron_instance1
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ``
-1. Install volttron-core, volttron-lib-auth and volttron-lib-zmq.
+  1. Create a new directory, say volttron_instance1
+  1. Create a new virtual environment in that directory and activate it
 
-   If editing one the above three platform packages:
-   *************************************************
-   You can point to your clone fork directory for the library you are editing and use pypi packages for rest.
-   You can do this using pip or poetry
+     .. code-block:: bash
+         cd volttron_instance1
+         python3 -m venv .venv
+         source .venv/bin/activate
 
-   a. Using pip
+  1. Install volttron-core, volttron-lib-auth and volttron-lib-zmq.
 
-      - ``pip install -e <path to cloned volttron-core dir>`` or ``pip install volttron-core``
-      - ``pip install -e <path to cloned volttron-lib-auth dir>`` or ``pip install volttron-lib-auth``
-      - ``pip install -e <path to cloned volttron-lib-zmq dir>`` or ``pip install volttron-lib-zmq``
+     If editing one the above three platform packages:
+     *************************************************
+     You can point to your clone fork directory for the library you are editing and use pypi packages for rest.
+     You can do this using pip or poetry
 
-   or
+     a. Using pip
 
-   b. Using poetry and volttron-zmq wrapper
+        - ``pip install -e <path to cloned volttron-core dir>`` or ``pip install volttron-core``
+        - ``pip install -e <path to cloned volttron-lib-auth dir>`` or ``pip install volttron-lib-auth``
+        - ``pip install -e <path to cloned volttron-lib-zmq dir>`` or ``pip install volttron-lib-zmq``
 
-      - Clone the `volttron-zmq library <https://github.com/eclipse-volttron/volttron-zmq>`_ that is a wrapper that is
-        dependent on volttron-core, volttron-lib-auth, and volttron-lib-zmq
-      - Update pyproject.toml file of volttron-zmq to point to cloned source directory of volttron-core,
-        and/or volttron-lib-auth, and/or volttron-lib-zmq and mark these source package as editable so that you don't
-        have to rebuild the wheel
-      - run ``poetry install``
+     or
 
-   If editing volttron agent or volttron libraries
-   ***********************************************
-   If you updating one of volttron agents or volttron-lib-* packages, you can simply install volttron using
-   ``pip intall volttron``
+     b. Using poetry and volttron-zmq wrapper
 
-1. Optional: `export VOLTTRON_HOME=/path/to/volttron-home`` Defaults to $HOME/.volttron. **Note: VOLTTRON>= 10
-   cannot work with volttron home directory used for previous versions of VOLTTRON**
+        - Clone the `volttron-zmq library <https://github.com/eclipse-volttron/volttron-zmq>`_ that is a wrapper that is
+          dependent on volttron-core, volttron-lib-auth, and volttron-lib-zmq
+        - Update pyproject.toml file of volttron-zmq to point to cloned source directory of volttron-core,
+          and/or volttron-lib-auth, and/or volttron-lib-zmq and mark these source package as editable so that you don't
+          have to rebuild the wheel
+        - run ``poetry install``
 
-1. Start volttron ``volttron -l volttron.log &`` This creates a new poetry project in $VOLTTRON_HOME and use that.
+     If editing volttron agent or volttron libraries
+     ***********************************************
+     If you updating one of volttron agents or volttron-lib-* packages, you can simply install volttron using
+     ``pip intall volttron``
 
-1. You can check the status by running the command ``vctl status``
+  1. Optional: `export VOLTTRON_HOME=/path/to/volttron-home`` Defaults to $HOME/.volttron. **Note: VOLTTRON>= 10
+     cannot work with volttron home directory used for previous versions of VOLTTRON**
 
-1. To install agents use ``vctl install <agent package name in pypi>`` or ``vctl install <path to forked agent source dir>``
+  1. Start volttron ``volttron -l volttron.log &`` This creates a new poetry project in $VOLTTRON_HOME and use that.
 
-1. To install any optional libraries use the ``vctl install-lib`` command.
-   Example ``vctl install-lib volttron-lib-bacnet-driver`` or ``vctl install-lib <path to forked library directory>``
+  1. You can check the status by running the command ``vctl status``
 
-1. Using ``vctl install`` and ``vctl install-lib`` ensures that versions of python packages used by VOLTTRON are
-   all compatible with each other. Using ``pip install <library>`` might work if there is no dependency
-   version mismatch but pip doesn't do dependency management as well as poetry.
+  1. To install agents use ``vctl install <agent package name in pypi>`` or ``vctl install <path to forked agent source dir>``
+
+  1. To install any optional libraries use the ``vctl install-lib`` command.
+     Example ``vctl install-lib volttron-lib-bacnet-driver`` or ``vctl install-lib <path to forked library directory>``
+
+  1. Using ``vctl install`` and ``vctl install-lib`` ensures that versions of python packages used by VOLTTRON are
+     all compatible with each other. Using ``pip install <library>`` might work if there is no dependency
+     version mismatch but pip doesn't do dependency management as well as poetry.
 
 Note:
 
