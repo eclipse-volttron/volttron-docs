@@ -57,10 +57,16 @@ Running VOLTTRON with source code
 
   6. You can check the status by running the command ``vctl status``
 
-  7. To install agents use ``vctl install <agent package name in pypi>`` or ``vctl install <path to forked agent source dir>``
+  7. To install agents use
+     ``vctl install <agent package name in pypi>``
+     or
+     ``vctl install <path to forked agent source dir>``
 
   8. To install any optional libraries use the ``vctl install-lib`` command.
-     Example ``vctl install-lib volttron-lib-bacnet-driver`` or ``vctl install-lib <path to forked library directory>``
+     Example:
+     ``vctl install-lib volttron-lib-bacnet-driver``
+     or
+     ``vctl install-lib <path to forked library directory>``
 
   9. Using ``vctl install`` and ``vctl install-lib`` ensures that versions of python packages used by VOLTTRON are
      all compatible with each other. Using ``pip install <library>`` might work if there is no dependency
