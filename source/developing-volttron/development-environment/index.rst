@@ -15,6 +15,6 @@ forked repository, and using an IDE to start volttron process and agents for deb
    virtual_machine/install-vm
    wsl2/wsl2-ubuntu.rst
    fork-repository
-   setup-volttron-core
+   setup-volttron
    pycharm/index
    vscode/index

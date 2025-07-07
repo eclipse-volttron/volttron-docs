@@ -13,21 +13,20 @@ This document assumes you already have
 
   2. VOLTTRON Pre-requisites software - Refer: :ref:`VOLTTRON Pre-requisites <VOLTTRON_Pre-requisites>`
 
-The first step to editing the repository is to fork it into your own user space.  Creating a fork makes a copy of the
-repository in your GitHub for you to make any changes you may require for your use-case.  This allows you to make
+The first step to editing any volttron repository is to fork it into your own user space.  Creating a fork makes a copy
+of the repository in your GitHub for you to make any changes you may require for your use-case.  This allows you to make
 changes without impacting the core VOLTTRON repository.
 
 VOLTTRON platform code is split into multiple repositories one for each customizable core feature. At a minimum, to
-run VOLTTRON you would need code from two repositories
+run VOLTTRON you would need code from three repositories
 
   1. http://github.com/eclipse-volttron/volttron-core - which contains VOLTTRON server, client (base agent), commands,
      utilities
   2. http://github.com/eclipse-volttron/volttron-lib-zmq - which contains the ZMQ message bus related code
 
-If you want to enable authentication and authorization, you would also need
+  3. http://github.com/eclipse-volttron/volttron-lib-auth - which requires authentication and authorization logic
 
-  3. http://github.com/eclipse-volttron/volttron-lib-auth
-
+VOLTTRON agents and libraries are also maintained in individual repositories under http://github.com/eclipse-volttron
 
 Fork all repositories that you wish to update. To fork a repository, point your favorite web browser to the
 repository, for example http://github.com/eclipse-volttron/volttron-core and then click "Fork" on the upper right of
@@ -65,58 +64,13 @@ From a terminal execute the following commands:
 Running VOLTTRON using your modified code
 =========================================
 
-VOLTTRON uses poetry for dependency management. If your environment does not have poetry, install poetry. Please
-refer to `official poetry documentation <https://python-poetry.org/docs/#installing-with-the-official-installer>`_
-
-Once you have poetry installed, do the following to start VOLTTRON using cloned source code
-
-1. Create a poetry project. There are two ways to do this
-
-   a. You could create your own poetry project and add libraries needed
-
-      - Create a new poetry project - (``mkdir <new project dir>; cd <project dir>; poetry init``)
-      - Activate poetry shell - ``poetry shell``
-      - Add necessary volttron packages using the command ``poetry add <cloned path orp pypi library name>``.
-        For example, ``poetry add <path to your cloned volttron-core fork dir>``,
-        ``poetry add volttron-lib-zmq``
-
-   or
-
-   b. Use volttron-zmq wrapper
-
-      - Clone the `volttron-zmq library <https://github.com/eclipse-volttron/volttron-zmq>`_ that is a wrapper that is
-        dependent on volttron-core, volttron-lib-auth, and volttron-lib-zmq
-      - Update pyproject.toml file of volttron-zmq to point to cloned source directory of volttron-core,
-        and/or volttron-lib-auth, and/or volttron-lib-zmq
-
-2. Update poetry configuration to set the default location of poetry virtual environments -
-   ``poetry config virtualenvs.in-project true``
-
-3. Run ``poetry install`` if you used option a or ``poetry install --no-root`` if you used option b above
-
-4. export VOLTTRON_HOME=/path/to/volttron/home. **Note: VOLTTRON10 cannot work with volttron home directory used for
-   previous versions of VOLTTRON**
-
-5. Start VOLTTRON in developer mode using **--dev** option and run it in the backgroun. --dev tells VOLTTRON to use
-   the current poetry project and not create a new one in VOLTTRON_HOME.
-   Example command: ``volttron --dev -vv -l ./volttron.log &``
-
-6. You can check the status by running the command ``vctl status``
-
-7. To install agents for testing use the vctl install command. This will add the source library of the agent to the
-   current poetry project and create agent's data directory in $VOLTTRON/agents. You can use vctl install with agent
-   library name fro pypi or to a cloned agent repository
-
-Note:
-
-To debug your source code during development, you could run/debug volttron and vctl commands from within an IDE.
-Refer: :ref:`PyCharm development environment<Pycharm-Dev-Environment>`
-
+Please refer to :ref:`Setup VOLTTRON for development <Setup-Volttron-Dev>` on how to setup a virtual environment, and
+install editable volttron agents and packages and run volttron with it.
 
 Adding and Committing files
 ===========================
 When you make modifications or creating new files to cloned repository, you should periodically (or after logical unit
-of work) you should move these code git repository. First, you should move the changed file to the stage for review
+of work) move these code to git repository. First, you should move the changed file to the stage for review
 before committing to the local repository.  For this example let's assume we have made a change to `README.md` in the
 root of the volttron directory and added a new file called `foo.py`.  To get those files in the staging area
 (preparing for committing to the local repository) we would execute the following commands:

@@ -31,6 +31,7 @@ The following packages will need to be installed on the system:
 
 *  python >= 3.10
 *  pip
+* poetry >= 2.0.1
 
 Verify python installation with the following command:
 
@@ -50,6 +51,9 @@ Install the dependencies with the following command:
 
        $ sudo apt install python3-venv python3-pip
 
+Install poetry:
+
+Please refer to `official poetry documentation <https://python-poetry.org/docs/#installing-with-the-official-installer>`_
 
 Step 2 - (Optional) Create and activate virtual environment
 ===========================================================
@@ -122,7 +126,9 @@ The following command starts volttron process in the background:
   volttron -vv -l volttron.log&
 
 This enters the virtual Python environment and then starts the platform in debug (vv) mode with a log file
-named volttron.log. By default log file will get written to VOLTTRON_HOME directory
+named volttron.log. By default log file will get written to VOLTTRON_HOME directory. During the first volttron run for
+a volttron instance, volttron creates a poetry project inside VOLTTRON_HOME directory ($VOLTTRON_HOME/pyproject.toml)
+and uses that manage all volttron packages.
 
 .. warning::
     If you plan on running VOLTTRON in the background and detaching it from the
@@ -244,6 +250,16 @@ debug purposes.
        2022-03-04 13:16:05,469 (listeneragent-3.3 3233) volttron.platform.vip.agent.core ERROR: Another common reason is not having an auth entry onthe target instance.
        2022-03-04 13:16:05,469 (listeneragent-3.3 3233) volttron.platform.vip.agent.core ERROR: Shutting down agent.
        ...
+
+Step 7. Installing VOLTTRON libraries (Optional)
+=================================================
+
+To install any volttron libraries needed by use the ``vctl install-lib <pypi package or src dir>`` command. For example,
+
+.. code-block:: bash
+
+    vctl install-lib /path/to/cloned/volttron-lib-bacnet-driver
+    vctl install-lib volttron-lib-bacnet-driver
 
 Step 7. Stop VOLTTRON (Optional)
 ================================

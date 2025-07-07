@@ -61,7 +61,7 @@ requires the following software
 1. python 3.10 (official version tested)
 2. git
 3. python3-venv
-4. poetry
+4. poetry >= 2.0.1
 
 Ubuntu-22.04 comes with python 3.10 and git.
 
