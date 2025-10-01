@@ -31,7 +31,7 @@ The following packages will need to be installed on the system:
 
 *  python >= 3.10
 *  pip
-* poetry >= 2.0.1
+*  poetry >= 2.0.1
 
 Verify python installation with the following command:
 
@@ -54,6 +54,14 @@ Install the dependencies with the following command:
 Install poetry:
 
 Please refer to `official poetry documentation <https://python-poetry.org/docs/#installing-with-the-official-installer>`_
+
+After install of poetry, we recommend updating poetry configuration to create virtual environment within the project. This is especially useful if you plan to use  poetry to build volttron libraries from source and develop agents or contribute to volttron core. 
+
+.. code-block:: bash
+
+   $ poetry config virtualenvs.in-project true
+
+
 
 Step 2 - (Optional) Create and activate virtual environment
 ===========================================================

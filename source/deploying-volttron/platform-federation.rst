@@ -28,25 +28,27 @@ Start the Federation Registry Service
 
 The Federation Registry Service is a critical component that enables platform discovery. It must be set up before configuring individual platforms.
 
-1. Clone the registry service repository:
+1. Install from pypi:
+   
+   .. code-block:: bash
 
+      pip install volttron-platform-lookup
+
+2. OR Install from source:
+   
    .. code-block:: bash
 
       git clone https://github.com/VOLTTRON/platform-lookup.git
       cd platform-lookup
+      poetry install
 
-2. Install dependencies:
-
-   .. code-block:: bash
-
-      pip install -r requirements.txt
 
 3. Start the registry service:
 
    .. code-block:: bash
 
-      # Default port is 8000 add --port 8080 to specify port 8080
-      uvicorn app:app
+      # Default port is 8000 you could send a custom port as command line argument or use -h/--help to see usage
+      volttron-platform-lookup
 
 Enabling Federation
 ------------------
