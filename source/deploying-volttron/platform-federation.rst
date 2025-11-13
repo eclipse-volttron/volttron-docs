@@ -57,13 +57,14 @@ To enable federation on a VOLTTRON platform, set the appropriate parameters when
 
 .. code-block:: bash
 
-   volttron --enable-federation --address tcp://192.168.1.10:22916 --federation-url http://registry-service:8000
+   volttron --enable-federation --address tcp://192.168.1.10:22916 --federation-url http://192.168.1.10:8000 --instance-name volttron-instance-1
 
 The parameters are:
 
 - ``--enable-federation``: Enables the federation service
 - ``--address``: Specifies the external address that other platforms will use to connect
-- ``--federation-url``: URL of the federation registry service
+- ``--federation-url``: URL of the platform lookup  service
+- ``--instance-name``: each volttron instance in a federation should have a unique name
 
 Alternatively, update your platform configuration file (VOLTTRON_HOME/config):
 
@@ -72,6 +73,7 @@ Alternatively, update your platform configuration file (VOLTTRON_HOME/config):
    enable_federation = true,
    federation_url = http://registry-service:8000
    address = tcp://192.168.1.10:22916
+   instance-name = volttron-instance-1
 
 
 REST API for Federation Registry
@@ -269,3 +271,4 @@ To secure federation:
 - Use TLS for the federation registry service
 - Restrict federation to trusted platforms
 - Use strict authorization rules for cross-platform messaging
+
