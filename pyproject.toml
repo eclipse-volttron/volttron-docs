@@ -6,6 +6,8 @@ authors = ["VOLTTRON Team <volttron@pnnl.gov>"]
 readme = "README.md"
 packages = [{include = "volttron-docs"}]
 
+license = "Apache-2.0"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pyyaml = "^6.0"
