@@ -29,13 +29,13 @@ Start the Federation Registry Service
 The Federation Registry Service is a critical component that enables platform discovery. It must be set up before configuring individual platforms.
 
 1. Install from pypi:
-   
+
    .. code-block:: bash
 
       pip install volttron-platform-lookup
 
 2. OR Install from source:
-   
+
    .. code-block:: bash
 
       git clone https://github.com/VOLTTRON/platform-lookup.git
@@ -43,12 +43,53 @@ The Federation Registry Service is a critical component that enables platform di
       poetry install
 
 
-3. Start the registry service:
+3. (Optional) Pre-create the registration password:
+
+   The registry service uses a master password stored in ``registration.key`` to authenticate platform registrations. You can optionally generate and store your own password in this file before starting the service:
+
+   .. code-block:: bash
+
+      # Generate a strong password and store it in registration.key
+      echo "your-strong-master-password" > registration.key
+
+   If you don't create this file, the service will auto-generate a secure password and save it to ``registration.key`` on first start.
+
+4. Start the registry service:
 
    .. code-block:: bash
 
       # Default port is 8000 you could send a custom port as command line argument or use -h/--help to see usage
       volttron-platform-lookup
+
+   On first run:
+
+   - If ``registration.key`` doesn't exist, the service will auto-generate a secure password and save it to ``registration.key``
+   - If ``registration.key`` already exists, the service will use the password from that file
+
+   **Important**: The password in ``registration.key`` must be securely communicated to all trusted VOLTTRON instance administrators who need to register and participate in the federated community. Each VOLTTRON platform will need a copy of this password stored in its ``$VOLTTRON_HOME/platform-lookup.key`` file.
+
+Securing the Federation Password
+---------------------------------
+
+Before enabling federation, the master password from the registry service must be stored securely on your VOLTTRON platform:
+
+1. Create a secure password file at ``$VOLTTRON_HOME/platform-lookup.key`` with restricted permissions:
+
+   .. code-block:: bash
+
+      # Create the secure password file with restricted permissions (read-only for owner)
+      echo "your-master-password-here" > $VOLTTRON_HOME/platform-lookup.key
+      chmod 600 $VOLTTRON_HOME/platform-lookup.key
+
+2. The password file must be readable only by the VOLTTRON process owner (unix permissions 0o600)
+
+**Important Security Notes**:
+
+- Never commit the platform-lookup.key file to version control
+- Only share the master password through secure channels with trusted administrators
+- Each VOLTTRON platform instance needs a copy of the same master password
+- The password is loaded at runtime and is never stored in configuration files
+
 
 Enabling Federation
 ------------------
@@ -63,7 +104,7 @@ The parameters are:
 
 - ``--enable-federation``: Enables the federation service
 - ``--address``: Specifies the external address that other platforms will use to connect
-- ``--federation-url``: URL of the platform lookup  service
+- ``--federation-url``: URL of the platform lookup service
 - ``--instance-name``: each volttron instance in a federation should have a unique name
 
 Alternatively, update your platform configuration file (VOLTTRON_HOME/config):
@@ -75,6 +116,8 @@ Alternatively, update your platform configuration file (VOLTTRON_HOME/config):
    address = tcp://192.168.1.10:22916
    instance-name = volttron-instance-1
 
+Once enabled, the federation service will automatically load the password from ``$VOLTTRON_HOME/platform-lookup.key`` and register with the federation registry service.
+
 
 REST API for Federation Registry
 ===============================
@@ -82,7 +125,7 @@ REST API for Federation Registry
 Registering a Platform
 ---------------------
 
-When federation is enabled, the federation service of volttron platform automatically registers with the specified registry service.
+When federation is enabled, the federation service of volttron platform automatically registers with the specified registry service using the master password for authentication.
 
 **Request**:
 
@@ -91,6 +134,7 @@ When federation is enabled, the federation service of volttron platform automati
    POST /platform HTTP/1.1
    Host: registry-service:8000
    Content-Type: application/json
+   Registration-Password: your-master-password-here
 
    {
      "id": "platform1",
@@ -99,7 +143,11 @@ When federation is enabled, the federation service of volttron platform automati
      "group": "default"
    }
 
-**Fields**:
+**Headers**:
+
+- ``Registration-Password`` (required): Master password for write operations. Must match the password configured on the registry service.
+
+**Body Fields**:
 
 - ``id``: Unique identifier for this platform
 - ``address``: External VIP address for other platforms to connect to
@@ -124,7 +172,7 @@ When federation is enabled, the federation service of volttron platform automati
 Discovering Platforms
 --------------------
 
-After registration, the federation service periodically queries the registry for other available platforms.
+After registration, the federation service periodically queries the registry for other available platforms. Authentication is optional for read operations.
 
 **Request**:
 
@@ -133,6 +181,12 @@ After registration, the federation service periodically queries the registry for
    GET /platforms HTTP/1.1
    Host: registry-service:8000
    Accept: application/json
+   Registration-Password: your-master-password-here
+
+**Headers**:
+
+- ``Registration-Password`` (optional): Master password for authentication. Provides full access to all platforms.
+- ``Platform-Credentials`` (optional): A registered platform's public credentials. Allows reading platforms in the same group.
 
 **Response**:
 
@@ -261,14 +315,26 @@ Common Issues
 Security Considerations
 =====================
 
-Federation uses the same security mechanisms as normal VOLTTRON communications:
+Federation uses multiple layers of security:
 
-1. **Authentication**: ZeroMQ CURVE authentication with public/private keys
-2. **Encryption**: All communications between platforms are encrypted
+1. **Registry Service Authentication**: HTTP header-based password authentication for all platform registrations and updates
+2. **Platform Communication**: ZeroMQ CURVE authentication with public/private keys for inter-platform communication
+3. **Encryption**: All communications between platforms are encrypted
 
-To secure federation:
+**Password Management**:
 
-- Use TLS for the federation registry service
+- The master password is stored in ``$VOLTTRON_HOME/platform-lookup.key`` with restricted Unix permissions (0o600)
+- The password file is read-only and never persisted in configuration files
+- Only administrators with access to the password file can register or modify platforms in the registry
+- The password must be manually shared with trusted VOLTTRON instance administrators through secure channels
+
+**Best Practices**:
+
+- Use TLS for the federation registry service in production (HTTPS instead of HTTP)
+- Restrict network access to the federation registry service
+- Use strong, randomly-generated master passwords
+- Regularly rotate the master password and update all platform instances
 - Restrict federation to trusted platforms
 - Use strict authorization rules for cross-platform messaging
-
+- Monitor registry service logs for unauthorized access attempts
+- Keep the platform-lookup.key file secure and backed up appropriately
