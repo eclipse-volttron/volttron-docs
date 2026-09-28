@@ -55,7 +55,7 @@ Install poetry:
 
 Please refer to `official poetry documentation <https://python-poetry.org/docs/#installing-with-the-official-installer>`_
 
-After install of poetry, we recommend updating poetry configuration to create virtual environment within the project. This is especially useful if you plan to use  poetry to build volttron libraries from source and develop agents or contribute to volttron core. 
+After install of poetry, we recommend updating poetry configuration to create virtual environment within the project. This is especially useful if you plan to use  poetry to build volttron libraries from source and develop agents or contribute to volttron core.
 
 .. code-block:: bash
 
@@ -63,13 +63,12 @@ After install of poetry, we recommend updating poetry configuration to create vi
 
 
 
-Step 2 - (Optional) Create and activate virtual environment
-===========================================================
-This step is not required if running on a isolated environment such as docker container or virtual machine. However,
-when installing VOLTTRON on a machine that is used for multiple projects/software, it is highly recommended that you
-create a virtual python environment within which VOLTTRON is installed and executed. This would isolate VOLTTRON and
-its dependencies from overwriting or creating version inconsistencies with other python libraries installed at
-system level.
+Step 2 - Create and activate virtual environment
+================================================
+Modular volttron requires an isolated virtual python environment within which VOLTTRON is installed and executed. This
+is required in docker containers.
+This would isolate VOLTTRON and its dependencies from overwriting or creating version inconsistencies with other
+python libraries installed at system level.
 Use the below commands to create a python virtual environment and activate it.
 
 .. code-block::
