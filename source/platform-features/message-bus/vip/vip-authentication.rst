@@ -4,231 +4,238 @@
 VIP Authentication
 ==================
 
-:ref:`VIP <VIP-Overview>` (VOLTTRON Interconnect Protocol) authentication is
-implemented in the :py:mod:`auth module<volttron.platform.auth>` and extends
-the ZeroMQ Authentication Protocol
-`ZAP <http://rfc.zeromq.org/spec:27>`__ to VIP by including the ZAP
-User-Id in the VIP payload, thus allowing peers to authorize access
-based on ZAP credentials. This document does not cover ZAP in any
-detail, but its understanding is fundamental to securely configuring
-ZeroMQ. While this document will attempt to instruct on securely
-configuring VOLTTRON for use on the Internet, it is recommended that the
-ZAP documentation also be consulted.
+:ref:`VIP <VIP-Overview>` (VOLTTRON Interconnect Protocol) authentication in modular
+VOLTTRON is designed with a clear separation between authentication (proving identity)
+and authorization (controlling access). Authentication verifies credentials when a peer
+connects, while authorization determines what that authenticated peer can do on the platform.
+
+This document focuses on authentication. For authorization, including capability-based
+access control and protected topics, see :ref:`VIP Authorization <VIP-Authorization>`.
+
+Overview
+--------
+
+In modular VOLTTRON, authentication is implemented using an extensible framework that:
+
+- Provides a **credentials store** for managing agent and platform credentials
+- Supports multiple **authentication mechanisms** (CURVE keys for ZMQ, extensible for others)
+- Uses a **message-bus-specific implementation** (e.g., ``ZMQServerAuthentication`` for ZMQ)
+- Leverages the **auth service** to coordinate credentials and authentication flows
+- Enables **customizable persistence** of credentials
+
+The authentication framework is defined in abstract classes located in ``volttron-core/types/auth/auth_service.py``,
+with concrete implementations in ``volttron-lib-auth`` and message-bus-specific implementations
+(such as ``volttron-lib-zmq`` for ZMQ).
+
+Architecture
+------------
+
+Abstract Classes
+~~~~~~~~~~~~~~~~
+
+The authentication framework is built on these abstract base classes defined in ``volttron-core/types/auth/``:
+
+- **Credentials** (base class): Represents a peer's credentials
+- **CredentialsStore** (ABC): Interface for storing and retrieving credentials
+- **CredentialsCreator** (ABC): Interface for creating new credentials
+- **Authenticator** (ABC): Interface for authentication implementations
+
+Concrete Implementations
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**volttron-core** provides abstract interfaces and concrete credential classes:
+
+- **Credentials**: Base class representing a peer's identity (without cryptographic material)
+- **PublicCredentials**: Credentials with a public key
+- **PKICredentials**: Public key infrastructure credentials (public + secret key)
+- **VolttronCredentials**: VOLTTRON-specific PKI credentials extending PKICredentials with domain and address
+- **CredentialsFactory**: Factory for creating credentials from various sources
+- **DefaultCredentialsFactory** / **DefaultPKICredentialsFactory**: Default credential creators
+
+**volttron-lib-auth** provides the main authentication service:
+
+- **VolttronAuthService**: The main authentication and authorization service that orchestrates credentials and authorization
+- Concrete **CredentialsStore** implementation: Persists credentials to disk or other backends
+- Custom authentication and authorization manager implementations
+
+**volttron-lib-zmq** provides message-bus-specific implementations:
+
+- **ZMQServerAuthentication**: Handles ZMQ authentication using CURVE mechanism and ZAP protocol
+- **ZMQAuthorization**: Handles authorization decisions (protected topics, RPC method access)
+
+Authentication Flow
+~~~~~~~~~~~~~~~~~~~
+
+1. **Credential Creation**: When an agent or platform is first configured, credentials
+   (e.g., CURVE keypair) are generated and stored
+2. **Connection Attempt**: Agent connects with its credentials
+3. **ZAP Authentication**: ZMQ's ZAP (ZeroMQ Authentication Protocol) exchanges credentials
+4. **Credential Verification**: ``ZMQServerAuthentication.authenticate()`` verifies the credentials
+   against the credentials store
+5. **Success/Failure**: Authentication succeeds if credentials match; connection is allowed or denied
+
+ZMQ Authentication
+------------------
 
 Default Encryption
-------------------
+~~~~~~~~~~~~~~~~~~
 
-By default, ZeroMQ operates in plain-text mode, without any sort of
-encryption. While this is okay for in-process and interprocess
-communications, via UNIX domain sockets, it is insecure for any kind of
-inter-network communications, especially when traffic must traverse the
-Internet. Therefore, VOLTTRON automatically generates an encryption key
-and enables `CurveMQ <http://rfc.zeromq.org/spec:26>`__ by default on
-all TCP connections.
+By default, ZeroMQ operates in plain-text mode, which is insecure for inter-network communications.
+VOLTTRON automatically enables encryption on all TCP connections using `CurveMQ <http://rfc.zeromq.org/spec:26>`__,
+which provides elliptic-curve encryption.
 
-To see VOLTTRON's public key run the ``vctl auth serverkey`` command.
-For example::
+Each VOLTTRON platform automatically generates a keypair on startup and uses it for all TCP connections.
+To view the platform's public key (used by remote agents to connect):
 
-    (volttron)[user@home]$ volttron-ctl auth serverkey
-    FSG7LHhy3v8tdNz3gK35G6-oxUcyln54pYRKu5fBJzU
+.. code-block:: bash
 
-Authentication Implementation
------------------------------
+    vctl auth servercred
 
-Authentication is handled on the server and client sides.
-The server authentication handles the setup and monitoring of incoming connection authentication.
-This verifies that the authentication method matches the appropriate auth protocol that has been implemented.
-The client authentication creates a connection address that contains all the necessary authentication meta data to 
-allow an agent to connect to a server. While the default authentication implementation is for Zap ZMQ, it is possible to 
-develop new authentication client and server designs. The server implementation is handled by the auth service, and client 
-authentication is handled by the agent core.
+This displays the platform's public key, which remote agents need to know.
 
-Client Authentication:
-* create_authenticated_address
+Credentials Management
+----------------------
 
-Server Authentication:
-* setup_authentication
-* handle_authentication
-* stop_authentication
-* unbind_authentication
+Unlike the monolithic VOLTTRON (which used ``auth.json`` with mixed authentication and authorization info),
+modular VOLTTRON separates credentials from authorization rules.
 
+**Credentials Storage**
 
-Peer Authentication
--------------------
+Credentials are stored by the credentials store, by default persisted to disk but can be changed by using a
+different AuthzPersistence implementation. Default Credentials used by VOLTTRON ZMQ is VolttronCredentials
+that uses a agent's vip identity and public private key pair to authenticate.
 
-ZAP defines a method for verifying credentials exchanged when a
-connection is initially established. The authentication mechanism
-provides three main pieces of information useful for authentication:
+Each VolttronCredential entry contains:
 
--  domain: a name assigned to a locally bound address (to which peers
-   connect)
--  address: the remote address of the peer
--  credentials: includes the authentication method and any associated
-   credentials
+- **identity**: The agent or service identifier
+- **public_key**: The public part of the credential (shared with peers)
+- **private_key**: The private part of the credential (kept secret, only on the platform)
+- **mechanism**: Authentication method (e.g., "CURVE" for ZMQ)
 
-During authentication, VOLTTRON checks these pieces against a list of
-accepted peers defined in a file, called the "auth file" in this
-document. This JSON-formatted file is located at
-``$VOLTTRON_HOME/auth.json`` and must have a matching entry in the allow
-list for remote connections to be accepted.
+**Adding Credentials for Remote Agents**
 
-The auth file should not be modified directly. 
-To change the auth file, use ``vctl auth`` subcommands: ``add``,
-``list``, ``remove``, and ``update``. (Run ``vctl auth --help``
-for more details and see the 
-:ref:`authentication commands documentation <VCTL-Auth-Commands>`.)
+To allow a remote agent to connect to your platform, you must:
 
-Here are some example entries::
+1. Have the remote agent's public key
+2. Add it to your platform's credentials store using ``vctl auth add``
 
-    (volttron)[user@home]$ vctl auth list
+Example: Adding a remote agent's credentials:
 
-    INDEX: 0
-    {
-      "domain": null, 
-      "user_id": "platform", 
-      "roles": [], 
-      "enabled": true, 
-      "mechanism": "CURVE", 
-      "capabilities": [], 
-      "groups": [], 
-      "address": null, 
-      "credentials": "k1C9-FPRAVjL-cH1iQqAJaCHUNVXaAlkVc7EqK0u9mI", 
-      "comments": "Automatically added by platform on start"
-    }
-    
-    INDEX: 2
-    {
-      "domain": null, 
-      "user_id": "platform.sysmon", 
-      "roles": [], 
-      "enabled": true, 
-      "mechanism": "CURVE", 
-      "capabilities": [], 
-      "groups": [], 
-      "address": null, 
-      "credentials": "5UD_GTk5dM2g4pk8d1-wM-BYgt4RAKiHf4SnT_YU6jY", 
-      "comments": "Automatically added on agent install"
-    }
+.. code-block:: bash
 
-**Note:**
-If using regular expressions in the "address" portion, denote this
-with "/". Backslashes must be escaped "\\".
+    vctl auth add AgentA --publickey HOVXfTspZWcpHQcYT_xGcqypBHzQHTgqEzVb4iXrcDg
 
-This is a valid regular expression: ``"/192\\.168\\.1\\..*/"``
+This creates a credentials entry for ``AgentA`` with the provided public key. The remote agent
+can now authenticate to your platform using its corresponding private key.
 
-These are invalid:
-``"/192\.168\.1\..*/", "/192\.168\.1\..*", "192\\.168\\.1\\..*"``
+**Removing Credentials**
 
-When authenticating, the credentials are checked. If
-they don't exist or don't match, authentication fails. Otherwise, if
-domain and address are not present (or are null), authentication
-succeeds. If address and/or domain exist, they must match as well for
-authentication to succeed.
+To remove credentials for an agent (preventing it from connecting):
 
-*CURVE*
-credentials include the remote peer's public key. Watching the **INFO**
-level log output of the auth module can help determine the required
-values for a specific peer.
+.. code-block:: bash
 
-Configuring Agents
-------------------
+    vctl auth remove AgentA
 
-A remote agent must know the platform's public key (also called the
-server key) to successfully authenticate. This server key can be
-passed to the agent's ``__init__`` method in the ``serverkey``
-parameter, but in most scenarios it is preferable to add the server key
-to the :ref:`known-hosts file<Known-Hosts-File>`.
+**Viewing Agent Credentials**
 
+To view the public keys of all agents on your platform:
 
-URL-style Parameters
-~~~~~~~~~~~~~~~~~~~~
+.. code-block:: bash
 
-VOLTTRON extends ZeroMQ's address scheme by
-supporting URL-style parameters for configuration. The following
-parameters are supported when connecting:
+    vctl auth agentcred
 
--  serverkey: encoded public key of remote server
--  secretkey: agent's own private/secret key
--  publickey: agent's own public key
--  ipv6: instructs ZeroMQ to attempt to use IPv6
+Connecting Remote Agents
+------------------------
 
-  **Note:**
-  Although these parameters are still supported they should rarely
-  need to be specified in the VIP-address URL.
-  Agent 
-  :ref:`key stores<Key-Stores>` and the 
-  :ref:`known-hosts file<Known-Hosts-File>` are automatically
-  used when possible.
+For detailed setup instructions and working examples of connecting remote agents to VOLTTRON instances, see:
+
+- `VOLTTRON Forward Historian <https://github.com/eclipse-volttron/volttron-forward-historian>`__ - Example of an agent connecting to remote VOLTTRON instances
+- :ref:`Platform Federation <VIP-Federation>` - For platform-to-platform communication patterns
 
 Platform Configuration
 ----------------------
 
-By default, the platform only listens on the local IPC VIP socket.
-Additional addresses may be bound using the ``--vip-address`` option,
-which can be provided multiple times to bind multiple addresses. Each
-:term:`VIP address` should follow the standard ZeroMQ convention of prefixing
-with the socket type (*ipc://* or *tcp://*) and may include any of the
-following additional URL parameters:
+The platform binds to VIP addresses to accept connections. By default, it listens only on
+the local IPC socket for security. Additional addresses can be configured using the
+``--vip-address`` option when starting the platform:
 
--  domain: domain name to associate with this endpoint (defaults to
-   "vip")
--  secretkey: alternate private/secret key (defaults to generated key
-   for *tcp://*)
--  ipv6: instructs ZeroMQ to attempt to use IPv6
+.. code-block:: bash
 
-Example Setup
--------------
+    volttron -vip ipc:///tmp/volttron-vip tcp://0.0.0.0:22916
 
-Suppose agent ``A`` needs to connect to a remote platform ``B``.
-First, agent ``A`` must know platform ``B``'s public key 
-(the *server key*) and platform ``B``'s IP address (including port).
-Also, platform ``B`` needs to know agent ``A``'s public key
-(let's say it is ``HOVXfTspZWcpHQcYT_xGcqypBHzQHTgqEzVb4iXrcDg``).
+This binds to both the local IPC socket and accepts TCP connections from any interface on port 22916.
 
-Given these values, a user on agent ``A``'s platform adds platform
-``B``'s information to the :ref:`known-hosts file<Known-Hosts-File>`.
+Each VIP address can include parameters:
 
-At this point agent ``A`` has all the infomration needed to connect to 
-platform ``B``, but platform ``B`` still needs to add an authentication entry
-for agent ``A``.
+- **domain**: A label for this endpoint (defaults to "vip")
+- **secretkey**: Alternate private key for this endpoint (defaults to platform's main key)
+- **ipv6**: Enable IPv6 support for this endpoint
 
-If agent ``A`` tried to connect to platform ``B`` at this point both parties
-would see an error. Agent ``A`` would see an error similar to:
+Example with parameters:
 
-::
+.. code-block:: bash
 
-    No response to hello message after 10 seconds.
-    A common reason for this is a conflicting VIP IDENTITY.
-    Shutting down agent.
+    volttron -vip tcp://0.0.0.0:22916?domain=external
 
-Platform ``B`` (if started with `-v` or `-vv`) will show an error:
+Authentication vs. Authorization
+---------------------------------
 
-::
+**Authentication** answers: "Who are you?"
 
-    2016-10-19 14:21:20,934 () volttron.platform.auth INFO: authentication failure: domain='vip', address='127.0.0.1', mechanism='CURVE', credentials=['HOVXfTspZWcpHQcYT_xGcqypBHzQHTgqEzVb4iXrcDg']
+- Proves identity via credentials (CURVE keys)
+- Handled by ``ZMQServerAuthentication``
+- Determines if a connection is allowed to be established
 
-Agent ``A`` failed to authenticat to platform ``B`` because the platform
-didn't have agent ``A``'s public in the authentication list.
+**Authorization** answers: "What are you allowed to do?"
 
-To add agent ``A``'s public key, a user on platform ``B`` runs::
+- Controls access to RPC methods and pub/sub topics
+- Handled by ``ZMQAuthorization``
+- Determines what an authenticated peer can do on the platform
 
-    (volttron)[user@platform-b]$ volttron-ctl auth add
-    domain []: 
-    address []: 
-    user_id []: Agent-A
-    capabilities (delimit multiple entries with comma) []: 
-    roles (delimit multiple entries with comma) []: 
-    groups (delimit multiple entries with comma) []: 
-    mechanism [CURVE]: 
-    credentials []: HOVXfTspZWcpHQcYT_xGcqypBHzQHTgqEzVb4iXrcDg
-    comments []: 
-    enabled [True]:
+In modular VOLTTRON, these are separate concerns with separate configurations.
+See :ref:`VIP Authorization <VIP-Authorization-Modular>` for details on controlling
+what authenticated agents can access.
 
-Now if agent ``A`` can successfully connect to platform ``B``, and platform
-``B``'s log will show:
+Troubleshooting Authentication
+-------------------------------
 
-::
+**Connection Timeout: "No response to hello message after 10 seconds"**
 
-    2016-10-19 14:26:16,446 () volttron.platform.auth INFO: authentication success: domain='vip', address='127.0.0.1', mechanism='CURVE', credentials=['HOVXfTspZWcpHQcYT_xGcqypBHzQHTgqEzVb4iXrcDg'], user_id='Agent-A'
+This usually means authentication failed. Check:
 
-For a more details see the :ref:`authentication walk-through <Agent-Authentication>`.
+1. Is the remote agent's public key registered on the platform?
+
+   .. code-block:: bash
+
+       # On the platform
+       vctl auth agentcred
+
+2. Does the remote agent have the correct platform public key?
+
+   .. code-block:: bash
+
+       # On the platform
+       vctl auth servercred
+
+3. Check platform logs for authentication errors:
+
+   .. code-block:: bash
+
+       # Start platform with verbose logging
+       volttron -vv
+
+**"authentication failure" in Logs**
+
+This indicates the presented credentials don't match any known credentials. Verify:
+
+- The public key was added correctly to the credentials store
+- No typos in the key (especially if copying manually)
+- The key corresponds to the correct agent identity
+
+**Connection Refused**
+
+Check that:
+
+1. The platform is actually listening on the specified address/port
+2. Network connectivity exists between the two platforms
+3. Firewalls aren't blocking the connection
