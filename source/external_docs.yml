@@ -80,6 +80,10 @@ volttron-lib-boptest-integration:
     version: main
     docs_dir: volttron-lib-boptest-integration/docs/source
 
+volttron-testing:
+    repo: https://github.com/eclipse-volttron/volttron-testing
+    version: develop
+
 volttron-ilc:
     version: develop
 
