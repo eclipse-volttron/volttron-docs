@@ -96,6 +96,7 @@ and quaterly user meetings. To be invited to office-hours, please `send the team
    developing-volttron/community
    developing-volttron/development-environment/index
    developing-volttron/developing-agents/agent-development
+   external-docs/volttron-testing/index
    developing-volttron/contributing-code
    developing-volttron/contributing-documentation
 
